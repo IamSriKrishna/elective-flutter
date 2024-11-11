@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script defer src="index.dart.js" type="application/javascript"></script>
+
+  <style>
+body {
+  background-color: #121212; /* Matte black */
+  margin: 0;
+  overflow: hidden; /* Ensures no scrollbars appear if the loader centers on larger screens */
+}
+
+.loading {
+  background-color: #121212; /* Matte black for loading overlay */
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  border-right: 16px solid #2ecc71;
+  border-bottom: 16px solid #e74c3c;
+  border-left: 16px solid #f1c40f;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 1.5s linear infinite, pulse 1.5s ease-in-out infinite, color-change 6s linear infinite;
+  animation: spin 1.5s linear infinite, pulse 1.5s ease-in-out infinite, color-change 6s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@-webkit-keyframes color-change {
+  0% {
+    border-top-color: #3498db;
+    border-right-color: #2ecc71;
+    border-bottom-color: #e74c3c;
+    border-left-color: #f1c40f;
+  }
+  25% {
+    border-top-color: #e74c3c;
+    border-right-color: #3498db;
+    border-bottom-color: #2ecc71;
+    border-left-color: #f1c40f;
+  }
+  50% {
+    border-top-color: #2ecc71;
+    border-right-color: #e74c3c;
+    border-bottom-color: #f1c40f;
+    border-left-color: #3498db;
+  }
+  75% {
+    border-top-color: #f1c40f;
+    border-right-color: #2ecc71;
+    border-bottom-color: #3498db;
+    border-left-color: #e74c3c;
+  }
+  100% {
+    border-top-color: #3498db;
+    border-right-color: #2ecc71;
+    border-bottom-color: #e74c3c;
+    border-left-color: #f1c40f;
+  }
+}
+
+@keyframes color-change {
+  0% {
+    border-top-color: #3498db;
+    border-right-color: #2ecc71;
+    border-bottom-color: #e74c3c;
+    border-left-color: #f1c40f;
+  }
+  25% {
+    border-top-color: #e74c3c;
+    border-right-color: #3498db;
+    border-bottom-color: #2ecc71;
+    border-left-color: #f1c40f;
+  }
+  50% {
+    border-top-color: #2ecc71;
+    border-right-color: #e74c3c;
+    border-bottom-color: #f1c40f;
+    border-left-color: #3498db;
+  }
+  75% {
+    border-top-color: #f1c40f;
+    border-right-color: #2ecc71;
+    border-bottom-color: #3498db;
+    border-left-color: #e74c3c;
+  }
+  100% {
+    border-top-color: #3498db;
+    border-right-color: #2ecc71;
+    border-bottom-color: #e74c3c;
+    border-left-color: #f1c40f;
+  }
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="loading">
+    <div class="loader"></div>
+  </div>
+
+  <script src="main.dart.js" type="application/javascript"></script>
+</body>
+
+</html>
