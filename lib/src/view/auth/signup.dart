@@ -25,6 +25,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? selectedItem;
   bool _load = false;
 
+  // Create a GlobalKey for Form state
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
@@ -42,6 +45,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           setState(() {
             _load = false;
           });
+          Components.error(context, state.error.toString());
         }
       },
       child: BlocBuilder<AuthBloc, AuthState>(
@@ -70,57 +74,65 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ],
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            AuthWidget.createAccount(),
-                            const SizedBox(height: 10),
-                            AuthWidget.signUpToAccount(),
-                            const SizedBox(height: 20),
-                            AuthWidget.registerNo(registerno),
-                            const SizedBox(height: 20),
-                            AuthWidget.email(email),
-                            const SizedBox(height: 20),
-                            AuthWidget.name(name),
-                            const SizedBox(height: 20),
-                            AuthWidget.department(
+                        child: Form(
+                          key: _formKey, // Assign the GlobalKey to the Form
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              AuthWidget.createAccount(),
+                              const SizedBox(height: 10),
+                              AuthWidget.signUpToAccount(),
+                              const SizedBox(height: 20),
+                              AuthWidget.registerNo(registerno),
+                              const SizedBox(height: 20),
+                              AuthWidget.email(email),
+                              const SizedBox(height: 20),
+                              AuthWidget.name(name),
+                              const SizedBox(height: 20),
+                              AuthWidget.department(
                                 value: selectedItem,
                                 onChanged: (String? value) {
                                   setState(() {
                                     selectedItem = value;
                                   });
                                 },
-                                items: AppData.department),
-                            const SizedBox(height: 20),
-                            AuthWidget.signIn(() {
-                              final register = int.parse(registerno.text);
-                              context.read<AuthBloc>().add(AuthCreate(
-                                  department: selectedItem!,
-                                  name: name.text,
-                                  email: email.text,
-                                  registerNo: register));
-                            }),
-                            const SizedBox(height: 20),
-                            TextButton(
-                              onPressed: () {
-                                context.goNamed("login");
-                              },
-                              child: Components.openSansText(
-                                  text: "Already Have an Account?"),
-                            ),
-                            // Developer credit
-                            const SizedBox(height: 30),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Components.openSansText(
-                                text: "Developed by Sri Krishna",
-                                fontSize: 12.0,
-                                fontStyle: FontStyle.italic,
-                                color: Colors.grey[600],
+                                items: AppData.department,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 20),
+                              AuthWidget.signIn(() {
+                                if (_formKey.currentState?.validate() ??
+                                    false) {
+                                  // Proceed only if form is valid
+                                  final register = int.parse(registerno.text);
+                                  context.read<AuthBloc>().add(AuthCreate(
+                                        department: selectedItem!,
+                                        name: name.text,
+                                        email: email.text,
+                                        registerNo: register,
+                                      ));
+                                }
+                              }),
+                              const SizedBox(height: 20),
+                              TextButton(
+                                onPressed: () {
+                                  context.goNamed("login");
+                                },
+                                child: Components.openSansText(
+                                    text: "Already Have an Account?"),
+                              ),
+                              const SizedBox(height: 30),
+                              Align(
+                                alignment: Alignment.center,
+                                child: Components.openSansText(
+                                  text: "Developed by Sri Krishna",
+                                  fontSize: 12.0,
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -128,7 +140,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 backgroundColor: Colors.blueGrey[50],
               ),
-              // Blurring background when loading
               if (_load)
                 Positioned.fill(
                   child: BackdropFilter(
@@ -138,7 +149,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                 ),
-              // Display the loading spinner
               if (_load)
                 const Center(
                     child: SpinKitWaveSpinner(color: Colors.black, size: 50.0)),

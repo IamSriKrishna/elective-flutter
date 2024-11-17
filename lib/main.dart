@@ -2,6 +2,7 @@ import 'package:elective/routes.dart';
 import 'package:elective/src/app/app_family.dart';
 import 'package:elective/src/bloc/auth/auth_bloc.dart';
 import 'package:elective/src/bloc/enroll/enroll_bloc.dart';
+import 'package:elective/src/bloc/session/timer_bloc.dart';
 import 'package:elective/src/bloc/student/student_bloc.dart';
 import 'package:elective/src/bloc/subjects/subjects_bloc.dart';
 import 'package:elective/src/controller/auth_controller.dart';
@@ -14,9 +15,15 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -32,6 +39,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => EnrollBloc(SubjectController()),
+        ),
+        BlocProvider(
+          create: (context) => TimerBloc(),
         ),
       ],
       child: Builder(
@@ -85,7 +95,7 @@ class MobileResolutionError extends StatelessWidget {
                 text:
                     'Sorry, this app is not available for mobile resolution.\n'
                     'Please use a laptop or PC for a better experience.\n\n',
-                   // 'Developed by Sri Krishna M, CSE Dept.',
+                // 'Developed by Sri Krishna M, CSE Dept.',
                 textAlign: TextAlign.center,
                 fontSize: 18),
           ],

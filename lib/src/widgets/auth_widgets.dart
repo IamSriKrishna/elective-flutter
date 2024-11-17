@@ -24,58 +24,74 @@ class AuthWidget {
       ),
     );
   }
+
   static Widget createAccount() {
-  return Text(
-    'Create Account',
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      fontSize: 28,
-      fontWeight: FontWeight.bold,
-      color: Colors.blueGrey[900],
-    ),
-  );
-}
+    return Text(
+      'Create Account',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
+        color: Colors.blueGrey[900],
+      ),
+    );
+  }
 
-static Widget signUpToAccount() {
-  return Text(
-    'Sign up to create a new account',
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      fontSize: 16,
-      color: Colors.blueGrey[600],
-    ),
-  );
-}
+  static Widget signUpToAccount() {
+    return Text(
+      'Sign up to create a new account',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 16,
+        color: Colors.blueGrey[600],
+      ),
+    );
+  }
 
-
-  static TextFormField registerNo(TextEditingController controller) {
+  static TextFormField registerNo(TextEditingController controller,{ TextInputAction textInputAction = TextInputAction.next}) {
     return TextFormField(
       controller: controller,
+      textInputAction: textInputAction,
       decoration: InputDecoration(
-        // prefixIcon:
-        //     Icon(Icons.account_circle_outlined, color: Colors.blueGrey[300]),
         labelText: 'Register Number',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
       ),
       keyboardType: TextInputType.number,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your register number';
+        }
+        // Check if the register number contains only digits (no alphabets or special characters)
+        if (!RegExp(r'^\d+$').hasMatch(value)) {
+          return 'Please enter a valid register number with only numbers';
+        }
+        return null; // Return null if validation is successful
+      },
     );
   }
-
 
   static TextFormField email(TextEditingController controller) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
-        // prefixIcon:
-        //     Icon(Icons.account_circle_outlined, color: Colors.blueGrey[300]),
         labelText: 'Email Address',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
       ),
       keyboardType: TextInputType.emailAddress,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your email address';
+        }
+        // Check if the email contains '@kcgcollege.com'
+        if (!value.endsWith('@kcgcollege.com')) {
+          return 'Please enter a valid email address with @kcgcollege.com';
+        }
+        return null; // Return null if validation is successful
+      },
     );
   }
 
@@ -151,7 +167,8 @@ static Widget signUpToAccount() {
           borderRadius: BorderRadius.circular(8.0),
         ),
       ),
-      child: Components.openSansText(text: text, fontSize: 16,color: Colors.white),
+      child: Components.openSansText(
+          text: text, fontSize: 16, color: Colors.white),
     );
   }
 }

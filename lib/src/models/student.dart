@@ -36,6 +36,7 @@ class Data {
   String department;
   int id;
   String name;
+  String email;
   String subject;
   int registerNo;
 
@@ -43,6 +44,7 @@ class Data {
     required this.department,
     required this.id,
     required this.name,
+    required this.email,
     required this.subject,
     required this.registerNo,
   });
@@ -52,6 +54,7 @@ class Data {
         id: json["id"],
         subject: json['subject'] ?? "",
         name: json["name"],
+        email: json["email"],
         registerNo: json["register_no"],
       );
 
@@ -59,6 +62,7 @@ class Data {
         "department": department,
         "id": id,
         "name": name,
+        "email": email,
         "subject": subject,
         "register_no": registerNo,
       };

@@ -48,8 +48,11 @@ final GoRouter router = GoRouter(
         );
       },
       redirect: (BuildContext context, GoRouterState state) {
-        final bool signedIn = context.read<AuthBloc>().state is AuthSuccess;
-        if (signedIn == false) {
+        final AuthStateStatus? authStatus =
+            context.read<AuthBloc>().state is AuthSuccess
+                ? (context.read<AuthBloc>().state as AuthSuccess).status
+                : null;
+        if (authStatus != AuthStateStatus.success) {
           return '/login';
         }
 
@@ -94,14 +97,16 @@ final GoRouter router = GoRouter(
         );
       },
       redirect: (BuildContext context, GoRouterState state) {
-        final bool signedIn = context.read<AuthBloc>().state is AuthSuccess;
-
+        final AuthStateStatus? authStatus =
+            context.read<AuthBloc>().state is AuthSuccess
+                ? (context.read<AuthBloc>().state as AuthSuccess).status
+                : null;
         // Redirect to login if token is empty
-        if (signedIn != true) {
+        if (authStatus != AuthStateStatus.success) {
           return '/login';
         }
 
-        return null; // Allow access to the selection page if token is not empty
+        return null;
       },
     ),
   ],

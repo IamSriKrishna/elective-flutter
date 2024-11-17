@@ -1,7 +1,7 @@
 import 'package:elective/src/models/student.dart';
 import 'package:equatable/equatable.dart';
 
-enum AuthStateStatus { empty, initial, loading, changed, success, failure }
+enum AuthStateStatus { empty, initial, loading, changed, success, failure, logout }
 
 class AuthState extends Equatable {
   const AuthState();

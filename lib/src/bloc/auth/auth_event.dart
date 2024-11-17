@@ -20,9 +20,12 @@ class AuthCreate extends AuthEvent {
 
 class AuthLogin extends AuthEvent {
   final int registerNo;
-  const AuthLogin({required this.registerNo});
+  final String otp;
+  const AuthLogin({required this.registerNo,required this.otp});
   @override
-  List<Object?> get props => [registerNo];
+  List<Object?> get props => [registerNo,otp];
 }
 
 class AuthGetStudentData extends AuthEvent {}
+
+class AuthLogOut extends AuthEvent{}

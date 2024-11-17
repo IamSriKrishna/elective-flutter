@@ -34,10 +34,11 @@ class AuthController {
     }
   }
 
-  Future<bool> login({required int registerNo}) async {
+  Future<bool> login({required int registerNo,required String otp}) async {
     try {
       Response res = await _dio.post(AppUrl.login, options: Options(), data: {
         "register_no": registerNo,
+        "otp":otp
       });
       if (res.data['status'].toString() == "true") {
         AppData.getStorage.write("token", res.data['token'].toString());

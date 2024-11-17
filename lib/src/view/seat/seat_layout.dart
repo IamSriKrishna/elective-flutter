@@ -1,8 +1,12 @@
 import 'dart:ui';
 
+import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:elective/src/app/app_family.dart';
 import 'package:elective/src/bloc/enroll/enroll_bloc.dart';
 import 'package:elective/src/bloc/enroll/enroll_event.dart';
 import 'package:elective/src/bloc/enroll/enroll_state.dart';
+import 'package:elective/src/bloc/session/timer_bloc.dart';
+import 'package:elective/src/bloc/session/timer_state.dart';
 import 'package:elective/src/widgets/components.dart';
 import 'package:elective/src/widgets/seat_layout_widget.dart';
 import 'package:flutter/material.dart';
@@ -33,8 +37,9 @@ class SeatLayout extends StatefulWidget {
 
 class _SeatLayoutState extends State<SeatLayout> {
   late List<int> seatStatus;
-  late List<int>
-      availableIndices; // Store the shuffled seat indices for reserved seats
+
+  DateTime now = DateTime.now();
+  late List<int> availableIndices;
   bool _isload = false;
   @override
   void initState() {
@@ -120,148 +125,296 @@ class _SeatLayoutState extends State<SeatLayout> {
       },
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          return Stack(
-            children: [
-              Scaffold(
-                body: CustomScrollView(
-                  slivers: [
-                    SeatLayoutWidget.appBar(widget.title, constraints),
-                    SeatLayoutWidget.seatAvailable(),
-                    SeatLayoutWidget.screen(),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 50),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, row) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0),
-                                    child: Container(
-                                      width: 30,
-                                      alignment: Alignment.centerLeft,
-                                      child: Components.openSansText(
-                                        text: String.fromCharCode(65 + row),
-                                        fontSize: 16,
+          return BlocBuilder<TimerBloc, TimerState>(
+            builder: (context, timerState) {
+              bool canLogin = false;
+              bool expery = false;
+
+              int hours = 0, minutes = 0, seconds = 0;
+              if (timerState is TimerExpiredState) {
+                expery = true;
+              }
+              if (timerState is TimerRunningState) {
+                canLogin = timerState.canLogin;
+                Duration remainingTime = timerState.timeRemaining;
+                hours = remainingTime.inHours;
+                minutes = remainingTime.inMinutes % 60;
+                seconds = remainingTime.inSeconds % 60;
+              }
+              return Stack(
+                children: [
+                  Scaffold(
+                    body: CustomScrollView(
+                      slivers: [
+                        SeatLayoutWidget.appBar(
+                            widget.title, constraints, context,
+                            onPressed: widget.subjects != "none"
+                                ? null
+                                : () {
+                                    if (canLogin && !expery) {
+                                      Components.confirmBook(context,
+                                          onPressed: () {
+                                        context.read<EnrollBloc>().add(
+                                            SelectSubjectEvent(
+                                                subjectId: widget.subjectId));
+
+                                        Navigator.pop(context);
+                                      });
+                                    } else if (expery) {
+                                      Components.sessionExpired(context);
+                                    } else {
+                                      Components.waitTillNov(context);
+                                    }
+                                  }),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 20.0),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 20),
+                                if (timerState is TimerBeforeStartState)
+                                  if (now.day == 20 && now.month == 11)
+                                    Components.openSansText(
+                                      text:
+                                          'Please wait till, 7:00 PM to log in.',
+                                      textAlign: TextAlign.center,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                    )
+                                  else
+                                    Components.openSansText(
+                                      text:
+                                          "Please wait until 20th November 2024, 7:00 PM to select your elective.",
+                                      textAlign: TextAlign.center,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                if (timerState is TimerRunningState)
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Components.openSansText(
+                                        text: "Time remaining:",
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black,
                                       ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GridView.builder(
-                                      shrinkWrap: true,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: columns,
-                                        mainAxisSpacing: 16,
-                                        crossAxisSpacing: 16,
+                                      AnimatedFlipCounter(
+                                        value: hours.toDouble(),
+                                        duration:
+                                            const Duration(milliseconds: 500),
+                                        textStyle: const TextStyle(
+                                          fontSize: 18,
+                                          fontFamily: AppFamily.bold,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        wholeDigits: 2,
+                                        fractionDigits: 0,
                                       ),
-                                      itemCount: columns,
-                                      itemBuilder: (context, column) {
-                                        if (column >= centerGapStart &&
-                                            column < centerGapEnd) {
-                                          return const SizedBox
-                                              .shrink(); // Gap between center seats
-                                        }
-
-                                        int seatIndex = row * 12 +
-                                            (column >= centerGapEnd
-                                                ? column - 2
-                                                : column);
-
-                                        if (seatIndex >= seatStatus.length) {
-                                          return const SizedBox.shrink();
-                                        }
-
-                                        return Tooltip(
-                                          message: seatStatus[seatIndex] == 0
-                                              ? "Available Seat"
-                                              : seatStatus[seatIndex] == 2
-                                                  ? "Reserved By Someone you might know"
-                                                  : "Seat Reserved by you",
-                                          child: InkWell(
-                                            onTap: seatStatus[seatIndex] != 2
-                                                ? () => _onSeatTap(seatIndex)
-                                                : null,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: seatStatus[seatIndex] ==
-                                                        0
-                                                    ? Colors.grey
-                                                        .withOpacity(0.2)
-                                                    : seatStatus[seatIndex] == 1
-                                                        ? Colors.green
-                                                        : Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
+                                      const Text(
+                                        ":",
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: AppFamily.bold,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      AnimatedFlipCounter(
+                                        value: minutes.toDouble(),
+                                        duration:
+                                            const Duration(milliseconds: 500),
+                                        textStyle: const TextStyle(
+                                          fontSize: 18,
+                                          fontFamily: AppFamily.bold,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        wholeDigits: 2,
+                                        fractionDigits: 0,
+                                      ),
+                                      const Text(
+                                        ":",
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontFamily: AppFamily.bold,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      AnimatedFlipCounter(
+                                        value: seconds.toDouble(),
+                                        duration:
+                                            const Duration(milliseconds: 500),
+                                        textStyle: const TextStyle(
+                                          fontSize: 18,
+                                          fontFamily: AppFamily.bold,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        wholeDigits: 2,
+                                        fractionDigits: 0,
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            );
-                          },
-                          childCount: rows,
-                        ),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: constraints.maxWidth * 0.4,
-                            vertical: constraints.maxHeight * 0.01),
-                        child: ElevatedButton(
-                          onPressed: widget.subjects != "none"
-                              ? null
-                              : () {
-                                  Components.confirmBook(context,
-                                      onPressed: () {
-                                    context.read<EnrollBloc>().add(
-                                        SelectSubjectEvent(
-                                            subjectId: widget.subjectId));
-
-                                    Navigator.pop(context);
-                                  });
-                                },
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text("Confirm "),
+                                if (timerState is TimerExpiredState)
+                                  Components.openSansText(
+                                    text: 'Session has expired.',
+                                    textAlign: TextAlign.center,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.redAccent,
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Blurring background when loading
-              if (_isload)
-                Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(
-                        sigmaX: 5.0, sigmaY: 5.0), // Adjust blur level
-                    child: Container(
-                      color: Colors.black.withOpacity(0), // Transparent overlay
+                        SeatLayoutWidget.seatAvailable(),
+                        SeatLayoutWidget.screen(),
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 50),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, row) {
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10.0),
+                                        child: Container(
+                                          width: 30,
+                                          alignment: Alignment.centerLeft,
+                                          child: Components.openSansText(
+                                            text: String.fromCharCode(65 + row),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: GridView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          gridDelegate:
+                                              SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: columns,
+                                            mainAxisSpacing: 16,
+                                            crossAxisSpacing: 16,
+                                          ),
+                                          itemCount: columns,
+                                          itemBuilder: (context, column) {
+                                            if (column >= centerGapStart &&
+                                                column < centerGapEnd) {
+                                              return const SizedBox
+                                                  .shrink(); // Gap between center seats
+                                            }
+
+                                            int seatIndex = row * 12 +
+                                                (column >= centerGapEnd
+                                                    ? column - 2
+                                                    : column);
+
+                                            if (seatIndex >=
+                                                seatStatus.length) {
+                                              return const SizedBox.shrink();
+                                            }
+
+                                            return Tooltip(
+                                              message: seatStatus[seatIndex] ==
+                                                      0
+                                                  ? "Available Seat"
+                                                  : seatStatus[seatIndex] == 2
+                                                      ? "Reserved By Someone you might know"
+                                                      : "Seat Reserved by you",
+                                              child: InkWell(
+                                                onTap: seatStatus[seatIndex] !=
+                                                        2
+                                                    ? () =>
+                                                        _onSeatTap(seatIndex)
+                                                    : null,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: seatStatus[
+                                                                seatIndex] ==
+                                                            0
+                                                        ? Colors.grey
+                                                            .withOpacity(0.2)
+                                                        : seatStatus[
+                                                                    seatIndex] ==
+                                                                1
+                                                            ? Colors.green
+                                                            : Colors.red,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              childCount: rows,
+                            ),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: constraints.maxWidth * 0.4,
+                                vertical: constraints.maxHeight * 0.01),
+                            child: ElevatedButton(
+                              onPressed: widget.subjects != "none"
+                                  ? null
+                                  : () {
+                                      if (canLogin && !expery) {
+                                        Components.confirmBook(context,
+                                            onPressed: () {
+                                          context.read<EnrollBloc>().add(
+                                              SelectSubjectEvent(
+                                                  subjectId: widget.subjectId));
+
+                                          Navigator.pop(context);
+                                        });
+                                      } else if (expery) {
+                                        Components.sessionExpired(context);
+                                      } else {
+                                        Components.waitTillNov(context);
+                                      }
+                                    },
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("Confirm "),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                  // Blurring background when loading
+                  if (_isload)
+                    Positioned.fill(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                            sigmaX: 5.0, sigmaY: 5.0), // Adjust blur level
+                        child: Container(
+                          color: Colors.black
+                              .withOpacity(0), // Transparent overlay
+                        ),
+                      ),
+                    ),
 
-              // Display the loading spinner
-              if (_isload)
-                const Center(
-                    child:
-                        SpinKitFadingCircle(color: Colors.black, size: 50.0)),
-            ],
+                  // Display the loading spinner
+                  if (_isload)
+                    const Center(
+                        child: SpinKitFadingCircle(
+                            color: Colors.black, size: 50.0)),
+                ],
+              );
+            },
           );
         },
       ),

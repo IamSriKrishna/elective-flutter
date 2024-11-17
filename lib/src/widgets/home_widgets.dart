@@ -1,13 +1,16 @@
 import 'package:elective/src/app/app_family.dart';
+import 'package:elective/src/bloc/auth/auth_bloc.dart';
+import 'package:elective/src/bloc/auth/auth_event.dart';
 import 'package:elective/src/bloc/student/student_state.dart';
 import 'package:elective/src/bloc/subjects/subjects_state.dart';
 import 'package:elective/src/widgets/components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glassmorphism_ui/glassmorphism_ui.dart';
 import 'package:go_router/go_router.dart';
 
 class HomeWidgets {
-  static SliverAppBar appBar(BoxConstraints constraints, StudentState state) {
+  static SliverAppBar appBar(BoxConstraints constraints, BuildContext context) {
     double width = constraints.maxWidth;
     double fontSize = width > 600 ? 24 : 16;
     double iconPadding = width > 600 ? 24 : 16;
@@ -20,15 +23,11 @@ class HomeWidgets {
         padding: EdgeInsets.symmetric(horizontal: iconPadding),
         child: Row(
           children: [
-            Icon(
-              Icons.school,
-              size: fontSize,
-              color: Colors.black,
-            ),
+            // Container(decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(""))),),
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: Components.openSansText(
-                  text: "KCG",
+                  text: "KCG COLLEGE OF TECHNOLOGY",
                   fontSize: fontSize,
                   fontFamily: AppFamily.bold,
                   fontWeight: FontWeight.bold),
@@ -37,29 +36,7 @@ class HomeWidgets {
         ),
       ),
       title: searchField(constraints),
-      actions: [logout(fontSize, state)],
-    );
-  }
-
-  static Widget welcomeUser(BoxConstraints constraints, StudentState state) {
-    double width = constraints.maxWidth;
-    double fontSize = width > 600 ? 24 : 16;
-    return SliverPadding(
-      padding: EdgeInsets.symmetric(
-          horizontal: constraints.maxWidth * 0.1,
-          vertical: constraints.maxHeight * 0.01),
-      sliver: SliverToBoxAdapter(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (state is GetStudent)
-              Components.openSansText(
-                  text: "Hello ${state.student.data.name} 😊,",
-                  fontFamily: AppFamily.bold,
-                  fontSize: fontSize)
-          ],
-        ),
-      ),
+      actions: [logout(fontSize, context)],
     );
   }
 
@@ -83,17 +60,21 @@ class HomeWidgets {
     );
   }
 
-  static Widget logout(double fontSize, StudentState state) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
-        children: [
-          if (state is GetStudent)
+  static Widget logout(double fontSize, BuildContext context) {
+    return InkWell(
+      onTap: () {
+        context.read<AuthBloc>().add(AuthLogOut());
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Row(
+          children: [
             Components.openSansText(
-                text: state.student.data.department,
+                text: "Log Out",
                 fontWeight: FontWeight.bold,
                 fontSize: fontSize - 5)
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -188,7 +169,7 @@ class HomeWidgets {
   ) {
     double width = constraints.maxWidth;
     double fontSize = width > 600 ? 24 : 16;
-    return SliverFillRemaining(
+    return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: constraints.maxWidth * 0.1,
@@ -210,6 +191,26 @@ class HomeWidgets {
                                 text: state.student.data.subject),
                             Components.openSansText(
                                 fontSize: fontSize, text: "as your elective"),
+                            const SizedBox(
+                              height: 35,
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Components.openSansText(
+                                    fontSize: fontSize,
+                                    text: "Check Your Email "),
+                                Components.openSansText(
+                                    fontWeight: FontWeight.bold,
+                                    text: state.student.data.email,
+                                    fontSize: fontSize,
+                                    fontFamily: AppFamily.bold),
+                                Components.openSansText(
+                                    fontSize: fontSize,
+                                    text: " For confirmation"),
+                              ],
+                            )
                           ],
                         )
                       : const SizedBox(),

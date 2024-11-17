@@ -27,10 +27,10 @@ class EnrollBloc extends Bloc<EnrollEvent, EnrollState> {
         final success = await _subjectController.enrollSubject(
             studentId: studentId, token: token, subjectId: event.subjectId);
         if (success) {
-          await Future.delayed(const Duration(seconds: 2));
-          emit(const EnrollSuccess(message: "Student created successfully"));
+          await Future.delayed(const Duration(milliseconds: 500));
+          emit(const EnrollSuccess(message: "Student Enroll successfully"));
         } else {
-          emit(const EnrollError(error: "Failed to create student"));
+          emit(const EnrollError(error: "Failed to Enroll subject"));
         }
       } catch (e) {
         Components.logErrorMessage("Failed To Enroll Bloc", e);

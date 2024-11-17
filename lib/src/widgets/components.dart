@@ -25,7 +25,7 @@ class Components {
     );
   }
 
-  static Future<dynamic> instuctor(BuildContext context,String text) {
+  static Future<dynamic> instuctor(BuildContext context, String text) {
     return showCupertinoModalPopup(
       context: context,
       builder: (context) {
@@ -34,8 +34,7 @@ class Components {
               fontFamily: AppFamily.bold,
               fontWeight: FontWeight.bold,
               text: "Instruction"),
-          content: openSansText(
-              text: text),
+          content: openSansText(text: text),
           actions: [
             CupertinoDialogAction(
               child: openSansText(text: "Ok"),
@@ -125,6 +124,93 @@ class Components {
     );
   }
 
+  static Future<dynamic> waitTillNov(BuildContext context) {
+    return showCupertinoModalPopup(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: openSansText(
+              fontFamily: AppFamily.bold,
+              fontWeight: FontWeight.bold,
+              text: "Warning!!!"),
+          content: openSansText(
+              text:
+                  "Please wait until 7:00 PM on 20th November 2024, or the link is no longer available after 11:00 PM."),
+          actions: [
+            CupertinoDialogAction(
+              child: openSansText(text: "Ok"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<dynamic> sessionExpired(BuildContext context) {
+    return showCupertinoModalPopup(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: openSansText(
+              fontFamily: AppFamily.bold,
+              fontWeight: FontWeight.bold,
+              text: "Session Expired"),
+          content: openSansText(
+              text:
+                  "Your session has expired. Unfortunately, there is no more time left."),
+          actions: [
+            CupertinoDialogAction(
+              child: openSansText(text: "Ok"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  static ScaffoldFeatureController<SnackBar, SnackBarClosedReason> error(
+      BuildContext context, String text) {
+    return ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: Colors.white, // Use a white color for the error icon
+              size: 24.0,
+            ),
+            const SizedBox(width: 10), // Add some spacing between icon and text
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white, // Set text color to white for contrast
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor:
+            Colors.redAccent, // A bright red background for the error
+        behavior: SnackBarBehavior
+            .fixed, // Optional: Fixed at the bottom of the screen
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0), // Rounded corners
+        ),
+        elevation: 6.0, // Add shadow effect to make it pop
+        duration: const Duration(
+            seconds: 4), // You can adjust the duration to your needs
+      ),
+    );
+  }
 
   static Logger log = Logger();
   static void logMessage(String message) {

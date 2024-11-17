@@ -57,8 +57,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         if (event.registerNo != 0) {
           // Try to create student
-          final success =
-              await _authController.login(registerNo: event.registerNo);
+          final success = await _authController.login(
+              registerNo: event.registerNo, otp: event.otp);
 
           if (success) {
             await Future.delayed(const Duration(
@@ -67,7 +67,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 message: "Student created successfully",
                 status: AuthStateStatus.success));
           } else {
-            emit(const AuthError(error: "Failed to create student"));
+            emit(const AuthError(error: "Failed to Login student"));
           }
         } else {
           Components.logErrorMessage("Failed Auth Bloc", "Field is Empty");
@@ -95,6 +95,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         Components.logErrorMessage("Failed Auth Bloc", errorMessage);
         emit(AuthError(error: errorMessage));
       }
+    });
+
+    on<AuthLogOut>((event, emit) async {
+      emit(const AuthSuccess(
+          message: "Student Logout successfully",
+          status: AuthStateStatus.logout));
     });
   }
 }
